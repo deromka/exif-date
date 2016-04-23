@@ -93,7 +93,7 @@ class Stats(object):
         dirStats = self.stats.get(key, {})
         curr = dirStats.get(name, 0)
         dirStats[name]=curr + 1
-        #self.stats[key]=dirStats
+        self.stats[key]=dirStats
 
     def __repr__(self):
         str = []
