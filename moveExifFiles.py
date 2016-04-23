@@ -69,7 +69,7 @@ class ExifFileReader(object):
             data=exifread.process_file(file)
             self.logger.debug(data)
         if data:
-            exifDateTimeField = data['EXIF DateTimeOriginal']
+            exifDateTimeField = data.get('EXIF DateTimeOriginal', "")
             if exifDateTimeField:
                 self.logger.debug(self.filename + " - " + str(exifDateTimeField))
                 date = str(exifDateTimeField).replace(":", "-").split()[0]
