@@ -4,6 +4,7 @@ import logging
 import exifread
 import os
 import shutil
+import hashlib
 import sys
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
@@ -11,85 +12,187 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 logger = logging.getLogger('moveExifFiles')
 logger.setLevel(logging.WARNING)
 
-if len(sys.argv) < 3:
-    print("Usage: moveExifFiles.py <directory to process> <destination directory>")
-    exit(1)
 
-dirname = sys.argv[1]
-destdirname = sys.argv[2]
+class InputArguments(object):
 
-if not dirname:
-    print "source directory cannot be empty!"
-    exit(1)
+    # create logger
+    logger = logging.getLogger('InputArguments')
+    logger.setLevel(logging.WARNING)
 
-if not destdirname:
-    print "destination directory cannot be empty!"
-    exit(1)
+    def __init__(self, argv):
+        if len(argv) < 3:
+            print("Usage: moveExifFiles.py <directory to process> <destination directory>")
+            exit(1)
 
-if not os.path.isdir(dirname):
-    print("source directory {} does not exist!".format(dirname))
-    exit(1)
+        self.dirname = argv[1]
+        self.destdirname = argv[2]
 
-if not os.path.isdir(destdirname):
-    logger.info ("destination directory {} does not exist, creating it...".format(destdirname))
-    print ("Created dir {}".format(destdirname))
-    os.makedirs(destdirname)
+        print("Using source directory (non-recursive): {}".format(self.dirname))
+        print("Using destination directory: {}".format(self.destdirname))
 
-print("Processing directory (non-recursive): {}".format(dirname))
-print("Destination directory: {}".format(destdirname))
+        if not self.dirname:
+            print "source directory cannot be empty!"
+            exit(1)
 
-def abs_src_path(filename):
-    return dirname + os.path.sep + filename
+        if not self.destdirname:
+            print "destination directory cannot be empty!"
+            exit(1)
 
-def abs_dest_path(filename):
-    return destdirname + os.path.sep + filename
+        if not os.path.isdir(self.dirname):
+            print("source directory {} does not exist!".format(self.dirname))
+            exit(1)
 
-stats = {}
+        if not os.path.isdir(self.destdirname):
+            self.logger.info ("destination directory {} does not exist, creating it...".format(self.destdirname))
+            print ("Created dir {}".format(self.destdirname))
+            os.makedirs(self.destdirname)
+    def abs_src_path(self, filename):
+        return self.dirname + os.path.sep + filename
 
-# list all files
-files = [f
-         for f in os.listdir(dirname)
-         if os.path.isfile(abs_src_path(f))]
-logger.debug(files)
-for f in files:
-    #open file, do EXIF stuf
-    with open(abs_src_path(f),'rb') as file:
-        data=exifread.process_file(file)
-        logger.debug(data)
-    if not data:
-        logger.debug("no EXIF in file {}".format(f))
-        continue
-    exifDateTimeField = data['EXIF DateTimeOriginal']
-    if not exifDateTimeField:
-        logger.debug("no EXIF DateTimeOriginal field in the EXIF data")
-        continue
-    logger.debug(f + " - " + str(exifDateTimeField))
-    date = str(exifDateTimeField).replace(":", "-").split()[0]
-    logger.debug(date)
+    def abs_dest_path(self, filename):
+        return self.destdirname + os.path.sep + filename
+
+
+class ExifFileReader(object):
+
+    # create logger
+    logger = logging.getLogger('ExifFileReader')
+    logger.setLevel(logging.WARNING)
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    def readExifDate(self):
+        date = ""
+        #open file, do EXIF stuf
+        with open(self.filename,'rb') as file:
+            data=exifread.process_file(file)
+            self.logger.debug(data)
+        if data:
+            exifDateTimeField = data['EXIF DateTimeOriginal']
+            if exifDateTimeField:
+                self.logger.debug(self.filename + " - " + str(exifDateTimeField))
+                date = str(exifDateTimeField).replace(":", "-").split()[0]
+                self.logger.debug(date)
+            else:
+                self.logger.debug("no EXIF DateTimeOriginal field in the EXIF data")
+        else:
+            self.logger.debug("no EXIF in file {}".format(self.filename))
+
+        return date
+
+class Stats(object):
+    # create logger
+    logger = logging.getLogger('Stats')
+    logger.setLevel(logging.WARNING)
+
+    def __init__(self):
+        self.stats = {}
+
+    def report(self, key, name):
+        dirStats = self.stats.get(key, {})
+        curr = dirStats.get(name, 0)
+        dirStats[name]=curr + 1
+        #self.stats[key]=dirStats
+
+    def __repr__(self):
+        str = []
+        if self.stats:
+            str.append("\nSummary: \n")
+        for cdir, cdirStats in self.stats.items():
+            str.append("\nDirectory {}".format(cdir))
+            for op, count in cdirStats.items():
+                str.append("\t{} files {}".format(count, op))
+        else:
+            str.append("\nNo stats were updated.")
+
+        out_str = ''.join(str)
+        return out_str
+
+def create_directories(args, date):
+    # get year from date
+    year = date.split("-")[0]
+    dst_dir_path = args.abs_dest_path(year + os.path.sep + date)
     # check if dir with date exists, if not create it
-    if not os.path.isdir(abs_dest_path(date)):
-        logger.info ("destination directory {} does not exist, creating it...".format(abs_dest_path(date)))
-        os.makedirs(abs_dest_path(date))
-        print ("Created dir {}".format(abs_dest_path(date)))
+    if not os.path.isdir(dst_dir_path):
+        logger.info ("destination directory {} does not exist, creating it...".format(dst_dir_path))
+        os.makedirs(dst_dir_path)
+        print ("Created dir {}".format(dst_dir_path))
+    return dst_dir_path
 
-    dirStats = stats.get(abs_dest_path(date), {})
-    if os.path.isfile(abs_dest_path(date + os.path.sep + f)):
-        logger.debug("file {} already exists, will not be moved.".format(abs_dest_path(date + os.path.sep + f)))
-        existed = dirStats.get('existed', 0)
-        dirStats['existed']=existed + 1
-    else:
-        shutil.move(abs_src_path(f), abs_dest_path(date + os.path.sep + f))
-        logger.debug("file {} moved to {}".format(abs_src_path(f), abs_dest_path(date + os.path.sep + f)))
-        moved = dirStats.get('moved', 0)
-        dirStats['moved']=moved + 1
+def handle_file(args, stats, file):
+    logger.debug("Handling file {} ...".format(file))
 
-    stats[abs_dest_path(date)]=dirStats
+    src_file_path = args.abs_src_path(file)
 
-if stats:
-    print "Summary: \n"
-    for cdir, cdirStats in stats.items():
-        print "\nDirectory {}".format(cdir)
-        for op, count in cdirStats.items():
-            print "\t{} files {}".format(count, op)
-else:
-    print "No changes were done."
+    exifReader = ExifFileReader(src_file_path)
+
+    date = exifReader.readExifDate()
+
+    if date:
+        dst_dir_path = create_directories(args, date)
+        dst_file_path = dst_dir_path + os.path.sep + file
+
+
+        if os.path.isfile(dst_file_path):
+            # files with the same name exist
+            # check their hashes, whether they are the same
+            currfileHash = md5(src_file_path)
+            newfileHash = md5(dst_file_path)
+            if currfileHash == newfileHash:
+                logger.debug("file {} already exists, thus it will not be moved.".format(dst_file_path))
+                stats.report(dst_dir_path, 'existed')
+            else:
+                logger.debug("file {} already exists, but the source file {} itself is different, will be moved with different name".format(dst_file_path, src_file_path))
+                i = 1
+                new_dst_file_name = dst_file_path+'_'+str(i)
+                while os.path.isfile(new_dst_file_name):
+                    logger.debug("file {} already exists, incrementing 1 to suffix")
+                    i = i + 1
+                    new_dst_file_name = dst_file_path+'_'+str(i)
+
+                shutil.move(src_file_path, new_dst_file_name)
+                stats.report(dst_dir_path, 'renamed')
+
+
+        else:
+            shutil.move(src_file_path, dst_file_path)
+            logger.debug("file {} moved to {}".format(src_file_path, dst_file_path))
+            stats.report(dst_dir_path, 'moved')
+
+
+
+
+
+def main(argv):
+
+    args = InputArguments(argv)
+
+    stats = Stats()
+
+    # list all files
+    files = [f
+             for f in os.listdir(args.dirname)
+             if os.path.isfile(args.abs_src_path(f))]
+
+    logger.debug(files)
+
+    for f in files:
+        handle_file(args, stats, f)
+
+    print stats
+
+
+
+
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+if __name__ == "__main__":
+    main(sys.argv)
