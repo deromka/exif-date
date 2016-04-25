@@ -99,10 +99,10 @@ class Stats(object):
         str = []
         if self.stats:
             str.append("\nSummary: \n")
-        for cdir, cdirStats in self.stats.items():
-            str.append("\nDirectory {}".format(cdir))
-            for op, count in cdirStats.items():
-                str.append("\t{} files {}".format(count, op))
+            for cdir, cdirStats in self.stats.items():
+                str.append("\nDirectory {}".format(cdir))
+                for op, count in cdirStats.items():
+                    str.append("\t{} files {}".format(count, op))
         else:
             str.append("\nNo stats were updated.")
 
