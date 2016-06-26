@@ -8,6 +8,7 @@ import hashlib
 import sys
 import time
 import datetime
+import ntpath
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
@@ -140,7 +141,7 @@ def handle_file(args, stats, file):
 
     if date:
         dst_dir_path = create_directories(args, date)
-        dst_file_path = dst_dir_path + os.path.sep + file
+        dst_file_path = dst_dir_path + os.path.sep + ntpath.basename(file)
 
 
         if os.path.isfile(dst_file_path):
