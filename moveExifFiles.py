@@ -173,6 +173,7 @@ def handle_file(args, stats, file):
 
 def handle_dir(args, stats, dir):
     abs_dir = os.path.abspath(dir)
+    start = time.time()
     logger.info("Processing folder {} ...".format(abs_dir))
     for root, subdirs, files in os.walk(abs_dir):
         logger.debug(subdirs)
@@ -184,7 +185,9 @@ def handle_dir(args, stats, dir):
         for subdir in subdirs:
             subdir_path = os.path.join(root, subdir)
             handle_dir(args, stats, subdir_path)
-    logger.info("Done with folder {}.\n".format(abs_dir))
+    end = time.time()
+    tookSec = end - start
+    logger.info("Done with folder {} ({} sec).\n".format(abs_dir, tookSec))
 
 
 
