@@ -189,7 +189,7 @@ def main(argv):
 
     stats = Stats()
 
-    handle_dir(args, stats, os.listdir(args.dirname))
+    handle_dir(args, stats, args.dirname)
 
     print stats
 
