@@ -133,7 +133,7 @@ def handle_file(args, stats, file):
     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(file)
 
     # by default, use modified data in format
-    date = datetime.datetime.fromtimestamp(mtime).isoformat()
+    date = datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d')
     if exifDate:
         # exif date if exists
         date = exifDate
