@@ -13,7 +13,7 @@ import ntpath
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
 logger = logging.getLogger('moveExifFiles')
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 
 
 class InputArguments(object):
