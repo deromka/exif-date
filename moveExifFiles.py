@@ -20,7 +20,7 @@ class InputArguments(object):
 
     # create logger
     logger = logging.getLogger('InputArguments')
-    logger.setLevel(logging.WARNING)
+    logger.setLevel(logging.INFO)
 
     def __init__(self, argv):
         if len(argv) < 3:
@@ -173,7 +173,7 @@ def handle_file(args, stats, file):
 
 def handle_dir(args, stats, dir):
     abs_dir = os.path.abspath(dir)
-    logger.debug("Handling dir {} ...".format(abs_dir))
+    logger.info("Processing folder {} ...".format(abs_dir))
     for root, subdirs, files in os.walk(abs_dir):
         logger.debug(subdirs)
         logger.debug(files)
@@ -184,6 +184,7 @@ def handle_dir(args, stats, dir):
         for subdir in subdirs:
             subdir_path = os.path.join(root, subdir)
             handle_dir(args, stats, subdir_path)
+    logger.info("Done with folder {}.\n".format(abs_dir))
 
 
 
