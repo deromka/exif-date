@@ -177,10 +177,12 @@ def handle_dir(args, stats, dir):
         logger.debug(subdirs)
         logger.debug(files)
         for f in files:
-            handle_file(args, stats, f)
+            file_path = os.path.join(root, f)
+            handle_file(args, stats, file_path)
 
         for subdir in subdirs:
-            handle_dir(args, stats, subdir)
+            subdir_path = os.path.join(root, subdir)
+            handle_dir(args, stats, subdir_path)
 
 
 
