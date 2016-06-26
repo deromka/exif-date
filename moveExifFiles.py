@@ -29,7 +29,7 @@ class InputArguments(object):
         self.dirname = argv[1]
         self.destdirname = argv[2]
 
-        print("Using source directory (non-recursive): {}".format(self.dirname))
+        print("Using source directory (recursive): {}".format(self.dirname))
         print("Using destination directory: {}".format(self.destdirname))
 
         if not self.dirname:
@@ -124,9 +124,8 @@ def create_directories(args, date):
     return dst_dir_path
 
 def handle_file(args, stats, file):
-    logger.debug("Handling file {} ...".format(file))
-
-    src_file_path = args.abs_src_path(file)
+    src_file_path = os.path.abspath(file)
+    logger.debug("Handling file {} ...".format(src_file_path))
 
     exifReader = ExifFileReader(src_file_path)
 
@@ -172,8 +171,10 @@ def handle_file(args, stats, file):
 
 
 def handle_dir(args, stats, dir):
-    logger.debug("Handling dir {} ...".format(dir))
-    for root, subdirs, files in os.walk(dir):
+    abs_dir = os.path.abspath(dir)
+    logger.debug("Handling dir {} ...".format(abs_dir))
+    for root, subdirs, files in os.walk(abs_dir):
+        logger.debug(subdirs)
         logger.debug(files)
         for f in files:
             handle_file(args, stats, f)
@@ -189,7 +190,8 @@ def main(argv):
 
     stats = Stats()
 
-    handle_dir(args, stats, args.dirname)
+    abs_src_dir = os.path.abspath(args.dirname)
+    handle_dir(args, stats, abs_src_dir)
 
     print stats
 
