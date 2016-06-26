@@ -6,6 +6,8 @@ import os
 import shutil
 import hashlib
 import sys
+import time
+import datetime
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
@@ -62,6 +64,7 @@ class ExifFileReader(object):
     def __init__(self, filename):
         self.filename = filename
 
+    # returned date format YYYY-mm-dd
     def readExifDate(self):
         date = ""
         #open file, do EXIF stuf
@@ -127,7 +130,14 @@ def handle_file(args, stats, file):
 
     exifReader = ExifFileReader(src_file_path)
 
-    date = exifReader.readExifDate()
+    exifDate = exifReader.readExifDate()
+    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(file)
+
+    # by default, use modified data in format
+    date = datetime.fromtimestamp(mtime).isoformat()
+    if exifDate:
+        # exif date if exists
+        date = exifDate
 
     if date:
         dst_dir_path = create_directories(args, date)
@@ -161,6 +171,15 @@ def handle_file(args, stats, file):
             stats.report(dst_dir_path, 'moved')
 
 
+def handle_dir(args, stats, dir):
+    logger.debug("Handling dir {} ...".format(dir))
+    for root, subdirs, files in os.walk(dir):
+        logger.debug(files)
+        for f in files:
+            handle_file(args, stats, f)
+
+        for subdir in subdirs:
+            handle_dir(args, stats, subdir)
 
 
 
@@ -170,15 +189,7 @@ def main(argv):
 
     stats = Stats()
 
-    # list all files
-    files = [f
-             for f in os.listdir(args.dirname)
-             if os.path.isfile(args.abs_src_path(f))]
-
-    logger.debug(files)
-
-    for f in files:
-        handle_file(args, stats, f)
+    handle_dir(args, stats, os.listdir(args.dirname))
 
     print stats
 
