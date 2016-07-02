@@ -126,7 +126,7 @@ def create_directories(args, date):
     dst_dir_path = args.abs_dest_path(year + os.path.sep + date)
 
     logger.debug("searching for directories with date {} ...".format(date))
-    simdirs = glob.glob("{}*".format(dst_dir_path), recursive=False)
+    simdirs = glob.glob("{}*".format(dst_dir_path))
     logger.debug("found dirs: " + simdirs)
 
     # choose the longest named dir, probably it has additional description in its name
