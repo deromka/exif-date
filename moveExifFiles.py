@@ -139,11 +139,11 @@ def create_directories(args, date):
 
     # check if dir with date exists, if not create it
     if not os.path.isdir(dst_dir_path):
-        logger.info ("Destination directory '{}' does not exist, creating it...".format(dst_dir_path))
+        logger.info ("Destination directory \'{}\' does not exist, creating it...".format(dst_dir_path))
         os.makedirs(dst_dir_path)
         print ("Created dir {}".format(dst_dir_path))
     else:
-        logger.info('Destination directory '{}' already exists. Using it.'.format(dst_dir_path))
+        logger.info('Destination directory \'{}\' already exists. Using it.'.format(dst_dir_path))
     return dst_dir_path
 
 def handle_file(args, stats, file):
