@@ -15,6 +15,15 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
 logger = logging.getLogger('moveExifFiles')
 logger.setLevel(logging.INFO)
+logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
+
+fileHandler = logging.FileHandler("{0}/{1}.log".format("/home/storage/exif-logs", datetime.datetime.now().isoformat()))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
 
 
 class InputArguments(object):
@@ -230,7 +239,7 @@ def removeEmptyFolders(path, removeRoot=True):
     # if folder empty, delete it
     files = os.listdir(path)
     if len(files) == 0 and removeRoot:
-        print "Removing empty folder:", path
+        logger.info("Removing empty folder: {}".format(path))
         os.rmdir(path)
 
 
