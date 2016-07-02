@@ -9,6 +9,7 @@ import sys
 import time
 import datetime
 import ntpath
+import glob
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
@@ -123,11 +124,22 @@ def create_directories(args, date):
     # get year from date
     year = date.split("-")[0]
     dst_dir_path = args.abs_dest_path(year + os.path.sep + date)
+
+    logger.debug("searching for directories with date {} ...".format(date))
+    simdirs = glob.glob("{}*".format(dst_dir_path), recursive=False)
+    logger.debug("found dirs: " + simdirs)
+
+    # choose the longest named dir, probably it has additional description in its name
+    sorted(simdirs, key=len, reverse=True)
+    dst_dir_path = simdirs[0]
+
     # check if dir with date exists, if not create it
     if not os.path.isdir(dst_dir_path):
-        logger.info ("destination directory {} does not exist, creating it...".format(dst_dir_path))
+        logger.info ("Destination directory {} does not exist, creating it...".format(dst_dir_path))
         os.makedirs(dst_dir_path)
         print ("Created dir {}".format(dst_dir_path))
+    else:
+        logger.info('Destination directory {} already exists. Using it.'.format(dst_dir_path))
     return dst_dir_path
 
 def handle_file(args, stats, file):
