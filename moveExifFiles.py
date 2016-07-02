@@ -40,8 +40,8 @@ class InputArguments(object):
         self.dirname = argv[1]
         self.destdirname = argv[2]
 
-        print("Using source directory (recursive): {}".format(self.dirname))
-        print("Using destination directory: {}".format(self.destdirname))
+        logger.info("Using source directory (recursive): {}".format(self.dirname))
+        logger.info("Using destination directory: {}".format(self.destdirname))
 
         if not self.dirname:
             print "source directory cannot be empty!"
@@ -252,7 +252,7 @@ def main(argv):
     abs_src_dir = os.path.abspath(args.dirname)
     handle_dir(args, stats, abs_src_dir)
 
-    print stats
+    logger.info(stats)
 
 
 
