@@ -11,7 +11,7 @@ import datetime
 import ntpath
 import glob
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
+#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
 logger = logging.getLogger('moveExifFiles')
 logger.setLevel(logging.INFO)
