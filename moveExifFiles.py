@@ -207,10 +207,31 @@ def handle_dir(args, stats, dir):
         for subdir in subdirs:
             subdir_path = os.path.join(root, subdir)
             handle_dir(args, stats, subdir_path)
+    # remove empty dirs
+    removeEmptyFolders(abs_dir)
+
     end = time.time()
     tookSec = end - start
     logger.info("Done with folder {} ({} sec).\n".format(abs_dir, tookSec))
 
+def removeEmptyFolders(path, removeRoot=True):
+    'Function to remove empty folders'
+    if not os.path.isdir(path):
+        return
+
+    # remove empty subfolders
+    files = os.listdir(path)
+    if len(files):
+        for f in files:
+            fullpath = os.path.join(path, f)
+            if os.path.isdir(fullpath):
+                removeEmptyFolders(fullpath)
+
+    # if folder empty, delete it
+    files = os.listdir(path)
+    if len(files) == 0 and removeRoot:
+        print "Removing empty folder:", path
+        os.rmdir(path)
 
 
 def main(argv):
