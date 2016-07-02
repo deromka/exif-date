@@ -127,19 +127,23 @@ def create_directories(args, date):
 
     logger.debug("searching for directories with date {} ...".format(date))
     simdirs = glob.glob("{}*".format(dst_dir_path))
-    logger.debug("found dirs: {}".format(simdirs))
+    # check if list is not empty
+    if simdirs:
+        logger.debug("found dirs: {}".format(simdirs))
 
-    # choose the longest named dir, probably it has additional description in its name
-    sorted(simdirs, key=len, reverse=True)
-    dst_dir_path = simdirs[0]
+        # choose the longest named dir, probably it has additional description in its name
+        sorted(simdirs, key=len, reverse=True)
+        dst_dir_path = simdirs[0]
+    else:
+        logger.debug("no directories exist.")
 
     # check if dir with date exists, if not create it
     if not os.path.isdir(dst_dir_path):
-        logger.info ("Destination directory {} does not exist, creating it...".format(dst_dir_path))
+        logger.info ("Destination directory '{}' does not exist, creating it...".format(dst_dir_path))
         os.makedirs(dst_dir_path)
         print ("Created dir {}".format(dst_dir_path))
     else:
-        logger.info('Destination directory {} already exists. Using it.'.format(dst_dir_path))
+        logger.info('Destination directory '{}' already exists. Using it.'.format(dst_dir_path))
     return dst_dir_path
 
 def handle_file(args, stats, file):
