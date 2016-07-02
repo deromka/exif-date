@@ -112,7 +112,7 @@ class Stats(object):
                     str.append("\t{} files {}".format(count, op))
 
             for op, count in self.total.items():
-                str.append("\tTotal {} files {}".format(count, op))
+                str.append("\n\nTotal {} files {}".format(count, op))
         else:
             str.append("\nNo stats were updated.")
 
