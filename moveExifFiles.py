@@ -92,12 +92,15 @@ class Stats(object):
 
     def __init__(self):
         self.stats = {}
+        self.total = {}
 
     def report(self, key, name):
         dirStats = self.stats.get(key, {})
         curr = dirStats.get(name, 0)
         dirStats[name]=curr + 1
         self.stats[key]=dirStats
+        curtype = self.total.get(name, 0)
+        self.total[name]=curtype + 1
 
     def __repr__(self):
         str = []
@@ -107,6 +110,9 @@ class Stats(object):
                 str.append("\nDirectory {}".format(cdir))
                 for op, count in cdirStats.items():
                     str.append("\t{} files {}".format(count, op))
+
+            for op, count in self.total.items():
+                str.append("\tTotal {} files {}".format(count, op))
         else:
             str.append("\nNo stats were updated.")
 
