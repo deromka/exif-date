@@ -11,13 +11,14 @@ import datetime
 import ntpath
 import glob
 
-from geopy.geocoders import Nominatim
+from geopy import Point
+from geopy.geocoders import Bing
 
 
 #logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 # create logger
 logger = logging.getLogger('getcity')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
@@ -79,8 +80,8 @@ def get_image_location_name(filename):
            (lat, lon) = get_exif_location(data)
            logger.debug("lat={}, lon={}".format(lat,lon))
            if lat and lon:
-               geolocator = Nominatim("%s",None,"US")
-               location = geolocator.reverse("{}, {}".format(lat,lon),True,20,"en-US")
+               geolocator = Bing("Anoh-j0qAKYh64FthGAOOFjyXExe3uf5D1L2qtPAEenOMna-IYXVH_0khZNQlHJH")
+               location = geolocator.reverse(Point(lat,lon),True,20)
                logger.info(location.address)
         else:
            logger.debug("no EXIF in file {}".format(filename))
