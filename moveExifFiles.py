@@ -183,7 +183,7 @@ def handle_file(args, stats, file):
             if currfileHash == newfileHash:
                 logger.debug("file {} already exists, deleted from source {}".format(dst_file_path, src_file_path))
                 stats.report(dst_dir_path, 'existed')
-		stats.report(src_dir_path, 'deleted')
+		stats.report(src_file_path, 'deleted')
 		os.remove(src_file_path)
             else:
                 logger.debug("file {} already exists, but the source file {} itself is different, will be moved with different name".format(dst_file_path, src_file_path))
